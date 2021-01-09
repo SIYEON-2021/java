@@ -2,36 +2,36 @@
 public class VarEx1 {
 	public static void main(String[] args) {
 		//byte type -128~127
-		//º¯¼ö < ¸®ÅÍ·²ÀÏ °æ¿ì ¿¡·¯
+		//ë³€ìˆ˜ < ë¦¬í„°ëŸ´ì¼ ê²½ìš° ì—ëŸ¬
 		final int score = 100;
 		//score =200;
 		boolean power = true;
 		
-		int oct = 010; // 8Áø¼ö, 10Áø¼ö·Î 8
-		int hex =0x10; // 16Áø¼ö, 10Áø¼ö·Î 16
+		int oct = 010; // 8ì§„ìˆ˜, 10ì§„ìˆ˜ë¡œ 8
+		int hex =0x10; // 16ì§„ìˆ˜, 10ì§„ìˆ˜ë¡œ 16
 		long I = 10_000_000000L;
 		
 		float f = 3.14f;
 		double d = 3.14;
-		double h = 3.14f; // d>f ¿À·ù°¡ ½ÇÇàµÇÁö ¾Ê´Â´Ù.
+		double h = 3.14f; // d>f ì˜¤ë¥˜ê°€ ì‹¤í–‰ë˜ì§€ ì•ŠëŠ”ë‹¤.
 		
 		char ch = 'A';
 		String s1 = "A" + 7; 
 		System.out.println(s1);
-		//¼ı»ç-> ¹®ÀÚ¿­·Î º¯È¯ÇÏ¿© °ªÀ» Ãâ·Â (¿Ş,¿À ¼ø¼­)
+		//ìˆ«ì‚¬-> ë¬¸ìì—´ë¡œ ë³€í™˜í•˜ì—¬ ê°’ì„ ì¶œë ¥ (ì™¼,ì˜¤ ìˆœì„œ)
 		
-		//¹®ÀÚ¿­ + any type -> ¹®ÀÚ¿­
-		//any type+ ¹®ÀÚ¿­ -> ¹®ÀÚ¿­
+		//ë¬¸ìì—´ + any type -> ë¬¸ìì—´
+		//any type+ ë¬¸ìì—´ -> ë¬¸ìì—´
 		
 		System.out.println(score);
 		System.out.println(power);
 		System.out.println(oct);
-		System.out.println(hex); //Áø¼öÇ¥ÇöÀ» À§ÇØ¼± printf»ç¿ë
+		System.out.println(hex); //ì§„ìˆ˜í‘œí˜„ì„ ìœ„í•´ì„  printfì‚¬ìš©
 		
 		System.out.println(10.);
 		System.out.println(.10);
 		System.out.println(10f);
 		System.out.println(1e3);
-		//Á¢¹Ì»ç´Â Ãâ·ÂµÇÁö ¾Ê´Â´Ù
+		//ì ‘ë¯¸ì‚¬ëŠ” ì¶œë ¥ë˜ì§€ ì•ŠëŠ”ë‹¤
 	}
 }
