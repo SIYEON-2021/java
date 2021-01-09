@@ -6,7 +6,7 @@ public class VarEx2 {
 	char ch= 'A';
 	int i ='A';
 	
-	String str = ""; // ºó ¹®ÀÚ¿­(empty string)
+	String str = ""; // ÂºÃ³ Â¹Â®Ã€ÃšÂ¿Â­(empty string)
 	String str2= "ABCD";
 	String str3= "123";
 	String str4= str2+ str3;
