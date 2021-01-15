@@ -58,11 +58,66 @@ public class BlockGame {
 			}
 				
 			
-			static class MyPanel extends JPanel{
+			static class MyPanel extends JPanel{ //VANVAS for Draw! 
+				public MyPanel() {
+					this.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
+					this.setBackground(Color.BLACK);
+				}
+				@Override
+				public void paint(Graphics g) {
+					super.paint(g);
+					Graphics2D g2d = (Graphics2D)g;
+					
+					drawUI ( g2d );
+				}
+				private void drawUI(Graphics2D g2d) {
+
 				
 				
+					//draw Blocks
+					for(int i =0; i<BLOCK_ROWS; i++) {
+						for(int j=0; j<BLOCK_COLUMNS; j++) {
+							if(blocks[i][j].isHedden) {
+								continue;
+							}
+							
+							if(blocks[i][j].color==0) {
+								g2d.setColor(Color.WHITE);
+							}
+							else if(blocks[i][j].color==1) {
+								g2d.setColor(Color.YELLOW);
+							}
+							else if(blocks[i][j].color==2) {
+								g2d.setColor(Color.BLUE);
+	 					    }
+							else if(blocks[i][j].color==3) {
+								g2d.setColor(Color.MAGENTA);
+							}
+							else if(blocks[i][j].color==4) {
+								g2d.setColor(Color.RED);
+							}
+							g2d.fillRect(blocks[i][j].x, blocks[i][j].y, blocks[i][j].width,blocks[i][j].height);//여기까지 블록그리기
+							
+							
+					}
+						//draw score
+						g2d.setColor(Color.WHITE);
+						g2d.setFont(new Font("TimeRoman", Font.BOLD, 20));
+						g2d.drawString("score : " + score, CANVAS_WIDTH/2 - 45, 20); //score 위치 30,20 도 괜찮습니다
+						
+						//draw Ball
+						g2d.setColor(Color.YELLOW);
+						g2d.fillOval(ball.x, ball.y, BALL_WIDTH, BALL_HEIGHT); 
+						
+						//draw Bar
+						g2d.setColor(Color.PINK);
+						g2d.fillOval(bar.x, bar.y, bar.width , bar.height); 
+						
+						
+						
+				}
 			}
-			
+		}
 		
 
 			public MyFrame(String title) {
@@ -81,10 +136,35 @@ public class BlockGame {
 				startTimer();
 			}
 			public void initData() {
+				for(int i =0; i<BLOCK_ROWS; i++) {
+					for(int j=0; j<BLOCK_COLUMNS; j++) {
+						blocks[i][j]= new Block();
+						blocks[i][j].x= BLOCK_WIDTH*j + BLOCK_GAP*j;
+						blocks[i][j].y= 100+ BLOCK_HEIGHT*i + BLOCK_GAP*i;
+						blocks[i][j].width= BLOCK_WIDTH;
+						blocks[i][j].height = BLOCK_HEIGHT;
+						blocks[i][j].color = 4- i ;
+						blocks[i][j].isHedden= false;
+						
+						
+ 					}
+				}
 				
 			}
 			public void setKeyListener() {
-				
+				this.addKeyListener( new KeyAdapter() {
+					@Override
+					
+					public void keyPressed(KeyEvent e ) { //Key Event
+						if(e.getKeyCode()== KeyEvent.VK_LEFT) {
+							System.out.println("Pressed Left Key");
+						}
+						else if (e.getKeyCode()== KeyEvent.VK_RIGHT) {
+							System.out.println("Pressed Right Key");
+							
+						}
+					}
+				});
 			}
 			public void startTimer() {
 				
