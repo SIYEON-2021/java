@@ -21,23 +21,39 @@ public class BlockGame {
 		//variable
 			static MyPanel myPanel = null;
 			static int score = 0;
-			static Timer time = null;
+			static Timer timer = null;
 			static Block[][] blocks = new Block [BLOCK_ROWS][BLOCK_COLUMNS]; //¼¼·Î °¡·Î y x
 			static Bar bar= new Bar();
 			static Ball ball = new Ball(); 
 			static int barXTarget = bar.x; // Target Value - interpolation
 			static int dir = 0; // 0 ; Up-Right 1 : Down-Right 2: Up-Left 3: Down-Left
-			static int ballSpeed = 5;
+			static int ballSpeed = 7;
+			static boolean isGameFinish = false;
 			
 			
 			
 			
 			static class Ball {
 				int x = CANVAS_WIDTH/ 2 - BALL_WIDTH/2;
-				int y= CANVAS_HEIGHT/ 2 - BALL_HEIGHT / 2;;
+				int y= CANVAS_HEIGHT/ 2 - BALL_HEIGHT / 2;
 				int width = BALL_WIDTH;
 				int height = BALL_HEIGHT;
 				
+				Point getCenter() {
+					return new Point( x + (BALL_WIDTH/2), y+(BALL_HEIGHT/2));
+				}
+				Point getBotoomCenter() {
+					return new Point( x + (BALL_WIDTH/2), y+(BALL_HEIGHT));
+				}
+				Point getTopCenter() {
+					return new Point (x + (BALL_WIDTH/2), y);
+				}
+				Point getLeftCenter() {
+					return new Point( x , y +(BALL_HEIGHT/2));
+				}
+				Point getRightCenter() {
+					return new Point( x +(BALL_WIDTH) , y +(BALL_HEIGHT/2));
+				}
 			}
 			
 			static class Bar {
@@ -54,7 +70,7 @@ public class BlockGame {
 				int width =BLOCK_WIDTH;
 				int height = BLOCK_HEIGHT;
 				int color = 0; //0:white 1:yellow 2:blue 2:mazanta 4:red
-				boolean isHedden = false; // after collison, block will be hidden.
+				boolean isHidden = false; // after collison, block will be hidden.
 			}
 				
 			
@@ -77,7 +93,7 @@ public class BlockGame {
 					//draw Blocks
 					for(int i =0; i<BLOCK_ROWS; i++) {
 						for(int j=0; j<BLOCK_COLUMNS; j++) {
-							if(blocks[i][j].isHedden) {
+							if(blocks[i][j].isHidden) {
 								continue;
 							}
 							
@@ -103,7 +119,12 @@ public class BlockGame {
 						//draw score
 						g2d.setColor(Color.WHITE);
 						g2d.setFont(new Font("TimeRoman", Font.BOLD, 20));
-						g2d.drawString("score : " + score, CANVAS_WIDTH/2 - 45, 20); //score À§Ä¡ 30,20 µµ ±¦Âú½À´Ï´Ù
+						
+						if(isGameFinish )
+							g2d.drawString("score : " + score + " Game Finished!", CANVAS_WIDTH/2 - 45, 20); //score À§Ä¡ 30,20 µµ ±¦Âú½À´Ï´Ù
+						else
+							g2d.drawString("score : " + score, CANVAS_WIDTH/2 - 45, 20);
+							
 						
 						//draw Ball
 						g2d.setColor(Color.YELLOW);
@@ -144,7 +165,7 @@ public class BlockGame {
 						blocks[i][j].width= BLOCK_WIDTH;
 						blocks[i][j].height = BLOCK_HEIGHT;
 						blocks[i][j].color = 4- i ;
-						blocks[i][j].isHedden= false;
+						blocks[i][j].isHidden= false;
 						
 						
  					}
@@ -158,19 +179,275 @@ public class BlockGame {
 					public void keyPressed(KeyEvent e ) { //Key Event
 						if(e.getKeyCode()== KeyEvent.VK_LEFT) {
 							System.out.println("Pressed Left Key");
+							barXTarget -= 20;
+							if( bar.x < barXTarget) { // repeate key pressed
+								barXTarget = bar.x;
+								
+							}
 						}
 						else if (e.getKeyCode()== KeyEvent.VK_RIGHT) {
 							System.out.println("Pressed Right Key");
-							
+							barXTarget += 20;
+							if( bar.x > barXTarget) { // repeate key pressed
+								barXTarget = bar.x;
+							}
 						}
 					}
 				});
 			}
 			public void startTimer() {
+				timer= new Timer(20, new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) { //Timer Event
+						movement();
+						checkCollision(); //Wall, BAR
+						checkCollisionBlock(); // Blocks 50
+						myPanel.repaint(); //Redraw!
+						
+						//Game Success!
+						isGameFinish();
+					}
+				});
+						
+				timer.start(); //START TIMER!
 				
 			}
-		
-		}
+			public void isGameFinish () {
+				//Game Success!
+				int count = 0;
+				for(int i = 0; i<BLOCK_ROWS; i++){
+					for(int j=0; j<BLOCK_COLUMNS; j++) {
+						Block block = blocks[i][j];
+						if(block.isHidden)
+							count++;
+						}
+					}
+				if(count == BLOCK_ROWS*BLOCK_COLUMNS) {
+					//Game Finished!
+					//timer.stop()
+					isGameFinish = true;
+					
+				}
+			}
+			public void movement(){
+				if(bar.x < barXTarget) {
+					bar.x += 10;
+				}else if(bar.x > barXTarget ) {
+					bar.x -=5;
+				}
+				
+				if(dir==0) { //0Àº up-right
+					ball.x += ballSpeed; 
+					ball.y -= ballSpeed; 
+					
+				}else if(dir==1) { //down-right
+					ball.x += ballSpeed; 
+					ball.y += ballSpeed;
+					
+				}else if(dir==2) { // up-left
+					ball.x -= ballSpeed; 
+					ball.y -= ballSpeed;
+				}else if(dir==3) { //down-left
+					ball.x -= ballSpeed; 
+					ball.y += ballSpeed;
+				}
+				
+			
+			}
+			public boolean duplRect(Rectangle rect1, Rectangle rect2) {
+				return rect1.intersects(rect2); // check two Rect is Duplicated!
+			}
+			public void checkCollision() {
+				if(dir==0) { //º®¿¡ ºÎµúÇûÀ» ¶§
+					//Wall À­º®¿¡ ºÎµúÇûÀ» ‹š
+					if(ball.y < 0 ) { //wall upper
+						dir = 1;
+					} 
+					//¿À¸¥ÂÊ º®¿¡ ºÎµúÇûÀ» ¶§
+					if(ball.x >CANVAS_WIDTH-BALL_WIDTH) { //wall right
+						dir = 2;
+					}
+					//Bar
+					//none
+				}else if(dir==1) { //down-right
+					//Wall
+					if(ball.y > CANVAS_HEIGHT-BALL_HEIGHT-BALL_HEIGHT-BALL_HEIGHT) {//wall bottom
+						dir = 0;
+						
+						//game reset
+						dir = 0;
+						ball.x = CANVAS_WIDTH/ 2 - BALL_WIDTH/2;
+						ball.y= CANVAS_HEIGHT/ 2 - BALL_HEIGHT / 2;
+						score=0;
+						
+					}
+					if(ball.x >CANVAS_WIDTH-BALL_WIDTH-BALL_HEIGHT-BALL_HEIGHT) { //wall right
+						dir = 3;
+					}
+					//Bar
+					if( ball.getBotoomCenter().y >= bar.y) {
+						if( duplRect(new Rectangle(ball.x, ball.y, ball.width, ball.height), 
+							         new Rectangle(bar.x, bar.y, bar.width, bar.height	)) ) {
+							dir =0;
+						}
+					}
+				}else if(dir==2) { // up-left
+					//Wall
+					if(ball.y < 0) {//wall upper
+						dir = 3;
+					}
+					if(ball.x < 0) {//wall left
+						dir = 0;
+					}
+					//bar
+				}else if(dir==3) { //down-left
+					//wall
+					if( ball.y > CANVAS_HEIGHT-BALL_HEIGHT-BALL_HEIGHT-BALL_HEIGHT) {//wall bottom
+						dir= 2 ;
+						
+						//game reset
+						dir = 0;
+						ball.x = CANVAS_WIDTH/ 2 - BALL_WIDTH/2;
+						ball.y= CANVAS_HEIGHT/ 2 - BALL_HEIGHT / 2;
+						score= 0;
+					}
+					if( ball.x < 0) { //wall left
+						dir =1;
+					}
+					//BAR
+					if( ball.getBotoomCenter().y >= bar.y) {
+						if( duplRect(new Rectangle(ball.x, ball.y, ball.width, ball.height), 
+							         new Rectangle(bar.x, bar.y, bar.width, bar.height	)) ) {
+							dir =2;
+						}
+					 }
+				  }
+			  }
+			public void checkCollisionBlock()  {
+				// 0 ; Up-Right 1 : Down-Right 2: Up-Left 3: Down-Left
+				for(int i = 0; i<BLOCK_ROWS; i++){
+					for(int j=0; j<BLOCK_COLUMNS; j++) {
+						Block block = blocks[i][j];
+						if(block.isHidden == false) {
+							if(dir==0) { //0 ; Up-Right
+								if( duplRect(new Rectangle(ball.x, ball.y, ball.width, ball.height), 
+								         new Rectangle(block.x, block.y, block.width, block.height	)) ) {
+									if(ball.x > block.x + 2&& 
+										ball.getRightCenter().x <= block.x + block.width -2) {
+										//block bottom collsion
+										dir=1;
+									}else {
+										//block left collision
+										dir = 2;
+									}
+									block.isHidden = true;
+									if(block.color==0) {
+										score +=10;
+									}else if(block.color==1) {
+										score +=20;
+									}else if(block.color==2) {
+										score +=30;
+									}else if(block.color==3) {
+										score +=40;
+									}else if(block.color==4) {
+										score +=50;
+									}
+								
+								
+								}
+							}
+							else if(dir==1) { //1 : Down-Right
+								if( duplRect(new Rectangle(ball.x, ball.y, ball.width, ball.height), 
+								         new Rectangle(block.x, block.y, block.width, block.height	)) ) {
+										if(ball.x > block.x + 2&& 
+											ball.getRightCenter().x <= block.x + block.width -2) {
+											//block top collsion
+											dir=0;
+										}else {
+											//block left collision
+											dir = 3;
+										}
+										block.isHidden = true;
+										if(block.color==0) {
+											score +=10;
+										}else if(block.color==1) {
+											score +=20;
+										}else if(block.color==2) {
+											score +=30;
+										}else if(block.color==3) {
+											score +=40;
+										}else if(block.color==4) {
+											score +=50;
+										}
+									
+									
+									}
+								
+							}
+							else if(dir==2) {// Up-Left 2
+								if( duplRect(new Rectangle(ball.x, ball.y, ball.width, ball.height), 
+								         new Rectangle(block.x, block.y, block.width, block.height	)) ) {
+									if(ball.x > block.x + 2&& 
+										ball.getRightCenter().x <= block.x + block.width -2) {
+										//block bottom collsion
+										dir=3;
+									}else {
+										//block right collision
+										dir = 0;
+									}
+									block.isHidden = true;
+									if(block.color==0) {
+										score +=10;
+									}else if(block.color==1) {
+										score +=20;
+									}else if(block.color==2) {
+										score +=30;
+									}else if(block.color==3) {
+										score +=40;
+									}else if(block.color==4) {
+										score +=50;
+									}
+								
+								}
+								
+							}
+							else if(dir==3) { //3: Down-Left
+								if( duplRect(new Rectangle(ball.x, ball.y, ball.width, ball.height), 
+								         new Rectangle(block.x, block.y, block.width, block.height	)) ) {
+									if(ball.x > block.x + 2&& 
+										ball.getRightCenter().x <= block.x + block.width -2) {
+										//block top collsion
+										dir=2;
+									}else {
+										//block right collision
+										dir = 1;
+									}
+									block.isHidden = true;
+									if(block.color==0) {
+										score +=10;
+									}else if(block.color==1) {
+										score +=20;
+									}else if(block.color==2) {
+										score +=30;
+									}else if(block.color==3) {
+										score +=40;
+									}else if(block.color==4) {
+										score +=50;
+									}
+								
+								
+								}
+								
+							}
+						}
+				 	 
+					}
+				
+				 }
+				
+			 }
+			
+		 }
 
 			public static void main(String[] args) {
 				new MyFrame("Block Game");
